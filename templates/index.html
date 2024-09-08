@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swaraksha Emergency</title>
+    <style>
+        /* Add basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 10px;
+            background: url('https://static.vecteezy.com/system/resources/thumbnails/004/422/309/small/women-protection-gradient-linear-icon-protect-girls-against-violence-female-empowerment-women-safety-thin-line-color-symbol-modern-style-pictogram-isolated-outline-drawing-vector.jpg') no-repeat center center fixed;
+            background-size: contain; /* Ensures the image covers the entire background */
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Radar scanner styling */
+        #scanner {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 100, 0, 0.3); /* Dark green border */
+            position: relative;
+            background: rgba(0, 100, 0, 0.1); /* Dark green background */
+            box-shadow: 0 0 15px 5px rgba(0, 100, 0, 0.1); /* Dark green shadow */
+            margin: 20px auto;
+            display: none;
+        }
+
+        #scanner::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 2px;
+            background: rgba(0, 100, 0, 0.7); /* Dark green scan line */
+            transform-origin: 0% 0%;
+            animation: rotate-scan 2s linear infinite;
+        }
+
+        @keyframes rotate-scan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Dots for detected objects */
+        .dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(139, 0, 0, 0.8); /* Dark red dots */
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.8); /* Dark red shadow */
+            animation: blip 1s infinite;
+        }
+
+        .dot1 {
+            bottom: 20px;
+            right: 100px;
+            animation-delay: 0.2s;
+        }
+
+        .dot2 {
+            bottom: 20px;
+            left: 120px;
+            animation-delay: 0.5s;
+        }
+
+        .dot3 {
+            top: 50px;
+            left: 100px;
+            animation-delay: 1s;
+        }
+
+        #numPeople {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        /* Styling for the location display */
+        #locationCity {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #crimeAlert {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+         /* Bottom-left Note */
+         .bottom-left {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: left;
+            width: 300px;
+        }
+
+        .bottom-left p {
+            margin: 5px 0;
+        }
+
+        .red { color: red; }
+        .yellow { color: rgb(17, 17, 1); }
+        .green { color: green; }
+
+    </style>
+</head>
+<body>
+    <h1>Welcome To Swaraksha Emergency Service</h1>
+    <p><b><u>Click the button bellow if emergency</u></b></p>
+    <button onclick="sendLocation()">Emergency</button>
+
+    <!-- Radar Scanner Animation -->
+    <div id="scanner">
+        <div class="dot dot1"></div>
+        <div class="dot dot2"></div>
+        <div class="dot dot3"></div>
+        <p><b>Scanning...</b></p>
+    </div>
+
+    <p id="numPeople"></p>
+    <div id="locationCity"><font size="3" color="green">Location</font>: Unknown</div>
+    <div id="crimeAlert"><font size="3" color="green">Crime Zone Alert</font> : Unknown</div>
+    
+    <div class="bottom-left">
+        <p><b>Note:</b></p>
+        <p><span class="red">Red</span>: 🔴 High Risk Zone – Elevated crime rate against women</p>
+        <p><span class="yellow">Yellow</span>:🟡 Caution Zone – Moderate crime activity
+            </p>
+        <p><span class="green">Green</span>: 🟢 Safe Zone – Low crime rate, safer for women</p>
+    </div>
+
+
+
+    <script>
+        // Function to request and display the user's location
+
+        function displayLocationAndCrimeAlert() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+
+                    // Fetch full address using reverse geocoding
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            var city = data.address.city || 'Unknown City';
+                            var state = data.address.state || 'Unknown State';
+                            var country = data.address.country || 'Unknown Country';
+                            var fullAddress = `${city}, ${state}, ${country}`;
+                            document.getElementById('locationCity').innerHTML = `<font color="green">Location</font>: ${fullAddress}`;
+
+
+                            // Fetch crime alert based on city
+                            fetch(`/getCrimeAlert?city=${city}`)
+                                .then(response => response.json())
+                                .then(alertData => {
+                                    document.getElementById('crimeAlert').innerHTML = `<font color="green">Crime Zone Alert</font>: ${alertData.alert}`;
+                                })
+                                .catch(error => console.error('Crime Alert Error:', error));
+                            
+                            // Send address details to the backend
+                            sendEmergencyLocation(latitude, longitude, fullAddress);
+                        })
+                        .catch(error => console.error('Geocoding Error:', error));
+                }, function(error) {
+                    console.error("Error Code = " + error.code + " - " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        window.onload = displayLocationAndCrimeAlert;
+
+        // Function to send location to the server
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+
+                    // Reverse geocode the location using Nominatim
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            var address = data.display_name || 'Address not found';
+
+                            // Send location and address data to the Flask backend
+                            fetch('/emergency', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({latitude: latitude, longitude: longitude, address: address})
+                            })
+                            .then(response => response.json())
+                            .then(() => {
+                                console.log('Location sent successfully.');
+
+                                // Start audio recording and analysis
+                                startRecording();
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                        })
+                        .catch(error => console.error('Geocoding Error:', error));
+                }, function(error) {
+                    console.error("Error Code = " + error.code + " - " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to start recording and get number of people
+        function startRecording() {
+            document.getElementById('scanner').style.display = 'block';
+
+            // Call the recording API
+            fetch('/start_recording', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('scanner').style.display = 'none';
+
+                    if (data.num_people) {
+                        document.getElementById('numPeople').innerHTML = `Estimated number of people near you is: <strong>${data.num_people}</strong>. <p>Be cautious and stay safe!</p><br/> <p> <b><small> Note: This data is shared with our authorities including your location </small></b></p>`;
+                    } else {
+                        alert('Failed to estimate the number of people.');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing the recording.');
+                });
+        }
+
+        // Call displayLocation on page load
+        window.onload = displayLocation;
+    </script>
+</body>
+</html>
