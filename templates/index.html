@@ -17,6 +17,7 @@
         h1 {
             color: #333;
             margin-top: 120px; 
+            
         }
 
         button {
@@ -231,7 +232,7 @@
                             .then(() => {
                                 console.log('Location sent successfully.');
                                 document.getElementById('confirmationMessage').innerHTML = 
-                                <b>Be safe. Your current location was sent to our authorities, and they will reach you out soon.<b>;
+                                "<b>Be safe. Your current location was sent to our authorities, and they will reach you out soon.<b>";
                                 
                             })
                             .catch(error => console.error('Error:', error));
