@@ -110,8 +110,8 @@
 
         #crimeAlert {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 30px;
+            left: 10px;
             background-color: rgba(255, 255, 255, 0.8);
             padding: 5px;
             border-radius: 5px;
@@ -230,8 +230,8 @@
                             })
                             .then(() => {
                                 console.log('Location sent successfully.');
-                                document.getElementById('confirmationMessage').innerText = 
-                                "Be safe. Your current location was sent to our authorities, and they will reach out to you soon.";
+                                document.getElementById('confirmationMessage').innerHTML = 
+                                <b>Be safe. Your current location was sent to our authorities, and they will reach you out soon.<b>;
                                 
                             })
                             .catch(error => console.error('Error:', error));
