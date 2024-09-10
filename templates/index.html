@@ -120,6 +120,7 @@
             font-weight: bold;
         }
 
+
         .bottom-left {
             position: absolute;
             bottom: 10px;
@@ -166,10 +167,34 @@
         <p><span class="green">Green</span>: 🟢 Safe Zone – Low crime rate, safer for women</p>
     </div>
 
+    <div id="nearestPoliceStation" style="position: absolute; top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 5px; font-size: 14px; font-weight: bold;">
+        <font size="3" color="green">Nearest Police Station</font>: Loading...
+    </div>
+
     <script>
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
+
+
+        function getNearestPoliceStation(latitude, longitude) {
+        fetch('/nearestPoliceStation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ latitude: latitude, longitude: longitude })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.police_station) {
+                document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: ${data.police_station}`;
+            } else {
+                document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: Not found`;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 
         function displayLocationAndCrimeAlert() {
             if (navigator.geolocation) {
@@ -193,6 +218,7 @@
                                     document.getElementById('crimeAlert').innerHTML = `<font color="green">Crime Zone Alert</font>: ${alertData.alert}`;
                                 })
                                 .catch(error => console.error('Crime Alert Error:', error));
+                                getNearestPoliceStation(latitude, longitude);
 
                             sendEmergencyLocation(latitude, longitude, fullAddress);
                         })
