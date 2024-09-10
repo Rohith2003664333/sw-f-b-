@@ -11,6 +11,12 @@ import pandas as pd
 from werkzeug.utils import secure_filename
 import os
 import logging
+from sklearn.preprocessing import LabelEncoder
+
+cls = joblib.load('police.pkl')
+en = joblib.load('label_encoder.pkl')  
+
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +46,19 @@ CORS(app)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+@app.route('/nearestPoliceStation', methods=['POST'])
+def nearest_police_station():
+    data = request.get_json()
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+
+    # Predict the nearest police station using the trained model
+    try:
+        nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
+        return jsonify({'police_station': nearest_station[0]})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/')
 def home():
