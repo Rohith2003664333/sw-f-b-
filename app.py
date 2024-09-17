@@ -11,11 +11,11 @@ import pandas as pd
 from werkzeug.utils import secure_filename
 import os
 import logging
-from sklearn.preprocessing import LabelEncoder
 
-cls = joblib.load('police.pkl')
-en = joblib.load('label_encoder.pkl')  
+cls = joblib.load('police_up.pkl')
+en = joblib.load('label_encoder_up.pkl')  
 
+df1=pd.read_csv('Sih_police_station_data.csv')
 
 
 # Setup logging
@@ -56,9 +56,14 @@ def nearest_police_station():
     # Predict the nearest police station using the trained model
     try:
         nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
-        return jsonify({'police_station': nearest_station[0]})
+        contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_station[0], case=False, na=False), 'phone_number'].values[0]
+        return jsonify({'police_station': nearest_station[0],
+                        'contact_number':contact_number})
     except Exception as e:
         return jsonify({'error': str(e)})
+
+
+
 
 @app.route('/')
 def home():
