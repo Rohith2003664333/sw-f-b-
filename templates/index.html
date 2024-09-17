@@ -233,6 +233,7 @@
         window.onload = displayLocationAndCrimeAlert;
 
         function startEmergency() {
+           
             sendLocation();
         }
 
@@ -248,7 +249,7 @@
                             var address = data.display_name;
                             document.getElementById('confirmationMessage').textContent = 'Emergency initiated! Your location has been sent to the authorities.';
                             console.log(`Emergency location: ${address}`);
-                            
+
                             // Trigger the phone call after sending the location
                             fetch('/emergency', {
                                 method: 'POST',
@@ -263,8 +264,14 @@
                             })
                             .then(response => response.json())
                             .then(data => {
-                                // Trigger the phone call
-                                window.location.href = `tel:${data.contact_number}`;
+                                console.log('Response from /emergency:', data);
+
+                                // Format the contact number correctly
+                                let contactNumber = data.contact_number.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                                console.log('Formatted Contact Number:', contactNumber);
+
+                                // Dial the contact number
+                                window.location.href = `tel:${contactNumber}`;
                             })
                             .catch(error => console.error('Error:', error));
                         })
@@ -272,6 +279,7 @@
                 });
             }
         }
+
     </script>
 </body>
 </html>
