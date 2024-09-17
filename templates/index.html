@@ -189,7 +189,7 @@
         .then(data => {
             if (data.police_station) {
                 document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: ${data.police_station} <br> <font color="green">Contact</font>: ${data.contact_number}`;
-                 window.location.href = `tel:${data.contact_number}`;
+                
             } else {
                 document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: Not found`;
             }
@@ -261,6 +261,10 @@
                                 document.getElementById('confirmationMessage').innerHTML = 
                                 "<b>Be safe. Your current location was sent to our authorities, and they will reach you out soon.<b>";
                                 
+                            })
+                            .then(data => {
+                                // Trigger the phone call
+                                window.location.href = `tel:${data.contact_number}`;
                             })
                             .catch(error => console.error('Error:', error));
                         })
