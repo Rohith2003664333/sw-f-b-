@@ -188,7 +188,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.police_station) {
-                document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: ${data.police_station}`;
+                document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: ${data.police_station} <br> <font color="green">Contact</font>: ${data.contact_number}`;
             } else {
                 document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: Not found`;
             }
