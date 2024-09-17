@@ -176,7 +176,6 @@
         let audioChunks = [];
         let isRecording = false;
 
-
         function getNearestPoliceStation(latitude, longitude) {
         fetch('/nearestPoliceStation', {
             method: 'POST',
@@ -189,7 +188,6 @@
         .then(data => {
             if (data.police_station) {
                 document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: ${data.police_station} <br> <font color="green">Contact</font>: ${data.contact_number}`;
-                
             } else {
                 document.getElementById('nearestPoliceStation').innerHTML = `<font color="green">Nearest Police Station</font>: Not found`;
             }
@@ -247,21 +245,23 @@
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
                         .then(response => response.json())
                         .then(data => {
-                            var address = data.display_name || 'Address not found';
-
+                            var address = data.display_name;
+                            document.getElementById('confirmationMessage').textContent = 'Emergency initiated! Your location has been sent to the authorities.';
+                            console.log(`Emergency location: ${address}`);
+                            
+                            // Trigger the phone call after sending the location
                             fetch('/emergency', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({ latitude: latitude, longitude: longitude, address: address })
+                                body: JSON.stringify({
+                                    latitude: latitude,
+                                    longitude: longitude,
+                                    address: address
+                                })
                             })
-                            .then(() => {
-                                console.log('Location sent successfully.');
-                                document.getElementById('confirmationMessage').innerHTML = 
-                                "<b>Be safe. Your current location was sent to our authorities, and they will reach you out soon.<b>";
-                                
-                            })
+                            .then(response => response.json())
                             .then(data => {
                                 // Trigger the phone call
                                 window.location.href = `tel:${data.contact_number}`;
@@ -269,11 +269,7 @@
                             .catch(error => console.error('Error:', error));
                         })
                         .catch(error => console.error('Geocoding Error:', error));
-                }, function(error) {
-                    console.error("Error Code = " + error.code + " - " + error.message);
                 });
-            } else {
-                alert("Geolocation is not supported by this browser.");
             }
         }
     </script>
