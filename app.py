@@ -57,7 +57,7 @@ def nearest_police_station():
     try:
         nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
         contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_station[0], case=False, na=False), 'phone_number'].values[0]
-        n=int(contact_number.replace('-',''))
+        n=contact_number.replace('-','')
         return jsonify({'police_station': nearest_station[0],
                         'contact_number':n})
     except Exception as e:
