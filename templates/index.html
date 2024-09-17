@@ -264,18 +264,7 @@
                             })
                             .then(response => response.json())
                             .then(data => {
-                                console.log('Response from /emergency:', data);
-        
-                                // Ensure the contact number is in string format
-                                let contactNumber = data.contact_number.toString();
-        
-                                // Optional: Validate the contact number (if needed)
-                                if (/^\d+$/.test(contactNumber)) {
-                                    // Dial the contact number
-                                    window.location.href = `tel:${contactNumber}`;
-                                } else {
-                                    console.error('Invalid contact number:', contactNumber);
-                                }
+                                    window.location.href = `tel:${data.contact_number}`;
                             })
                             .catch(error => console.error('Error:', error));
                         })
