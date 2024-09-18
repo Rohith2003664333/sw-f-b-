@@ -16,6 +16,7 @@
 
         h1 {
             color: #333;
+
             margin-top: 120px; 
             
         }
@@ -244,34 +245,46 @@
         }
 
         function sendLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
-                .then(response => response.json())
-                .then(data => {
-                    var address = data.display_name;
-                    document.getElementById('confirmationMessage').textContent = 'Emergency initiated! Your location has been sent to the authorities.';
-                    console.log(`Emergency location: ${address}`);
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            var address = data.display_name;
+                            document.getElementById('confirmationMessage').textContent = 'Emergency initiated! Your location has been sent to the authorities.';
+                            console.log(`Emergency location: ${address}`);
 
-                    // Fetch the nearest police station contact number
-                    getNearestPoliceStation(latitude, longitude).then(contactNumber => {
-                        if (contactNumber) {
-                            let cleanedContactNumber = contactNumber.replace(/\D/g, '');  // Clean the contact number
+                            fetch('/emergency', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    latitude: latitude,
+                                    longitude: longitude,
+                                    address: address
+                                })
+                            })
 
-                            // Initiate the phone call
-                            window.location.href = `tel:${cleanedContactNumber}`;
-                        } else {
-                            console.error('No contact number found');
-                        }
-                    });
-                })
-                .catch(error => console.error('Geocoding Error:', error));
-        });
-    }
-}
+                            // Fetch the nearest police station contact number
+                            getNearestPoliceStation(latitude, longitude).then(contactNumber => {
+                                if (contactNumber) {
+                                    let cleanedContactNumber = contactNumber.replace(/\D/g, '');  // Clean the contact number
+
+                                    // Initiate the phone call
+                                    window.location.href = `tel:${cleanedContactNumber}`;
+                                } else {
+                                    console.error('No contact number found');
+                                }
+                            });
+                        })
+                        .catch(error => console.error('Geocoding Error:', error));
+                });
+            }
+        }
 
     </script>
 </body>
