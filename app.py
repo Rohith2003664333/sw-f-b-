@@ -11,6 +11,7 @@ import pandas as pd
 from werkzeug.utils import secure_filename
 import os
 import logging
+import math
 
 cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
@@ -55,17 +56,52 @@ def nearest_police_station():
 
     # Predict the nearest police station using the trained model
     try:
-        nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
-        contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_station[0], case=False, na=False), 'phone_number'].values[0]
-        n=contact_number.replace('-','')
-        return jsonify({'police_station': nearest_station[0],
-                        'contact_number':n})
+        nearest_police_station.nearest_station = en.inverse_transform(cls.predict([[latitude, longitude]]))
+        contact_number = df1.loc[df1['Police_station_name'].str.contains(nearest_police_station.nearest_station[0], case=False, na=False), 'phone_number'].values[0]
+        n = contact_number.replace('-', '')  # Clean number
+        return jsonify({
+            'police_station': nearest_police_station.nearest_station[0],
+            'contact_number': n  # Ensure you return the cleaned number
+        })
     except Exception as e:
         return jsonify({'error': str(e)})
 
 
+@app.route('/distanceP', methods=['POST'])
+def distance_p():
+    data = request.get_json()
+    lat1 = data.get('latitude')
+    lon1 = data.get('longitude')
+    nearest_station = en.inverse_transform(cls.predict([[lat1, lon1]]))[0]
+    lat1=float(lat1)
+    lon1=float(lon1)
 
+    # Get the nearest station name and location
+    
+    station_data = df1[df1['Police_station_name'].str.contains(nearest_station, case=False, na=False)]
 
+    lat2 = station_data['latitude'].values[0]
+    lon2 = station_data['longitude'].values[0]
+
+    lat1, lon1 = math.radians(lat1), math.radians(lon1)
+    lat2, lon2 = math.radians(lat2), math.radians(lon2)
+
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    R = 6371000  # Earth's radius in meters
+    distance = (R * c)/1000
+    distance = round(distance,2)
+
+    return jsonify({'police_distance': distance})
+
+    
+
+              
 @app.route('/')
 def home():
     return render_template('index.html')
