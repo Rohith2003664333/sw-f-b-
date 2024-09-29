@@ -48,6 +48,19 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/emergency_contacts')
+def emergency_contacts():
+    return render_template('emergency_contacts.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
 @app.route('/nearestPoliceStation', methods=['POST'])
 def nearest_police_station():
     data = request.get_json()
@@ -129,4 +142,4 @@ def get_crime_alert():
     return jsonify({'alert': crime_alert})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0', port=5000)
