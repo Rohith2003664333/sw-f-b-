@@ -273,7 +273,7 @@
 
         function sendLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+                navigator.geolocation.getCurrentPosition(function (position) {
                     var latitude = position.coords.latitude;
                     var longitude = position.coords.longitude;
 
@@ -294,27 +294,36 @@
                                     longitude: longitude,
                                     address: address
                                 })
-                            })
+                            });
 
                             // Fetch the nearest police station contact number
                             getNearestPoliceStation(latitude, longitude).then(contactNumber => {
+
                                 if (contactNumber) {
                                     let cleanedContactNumber = contactNumber.replace(/\D/g, '');  // Clean the contact number
 
-                                    // Prefill SMS message with address, latitude, and longitude
-                                    let smsBody = `Emergency! Please help. My current location is: ${address} (Latitude: ${latitude}, Longitude: ${longitude})`;
+                                    // Initiate the phone call
+                                    window.location.href = `tel:${cleanedContactNumber}`;
 
-                                    // Open the SMS app with prefilled message
-                                    window.location.href = `sms:${cleanedContactNumber}?body=${encodeURIComponent(smsBody)}`;
+                                    // Introduce a delay before opening SMS window
+                                    setTimeout(function () {
+                                        // Prefill SMS message with address, latitude, and longitude
+                                        let smsBody = `Emergency! Please help. My current location is: ${address} (Latitude: ${latitude}, Longitude: ${longitude})`;
+
+                                        // Open the SMS app with prefilled message
+                                        window.location.href = `sms:${cleanedContactNumber}?body=${encodeURIComponent(smsBody)}`;
+                                    }, 10000); // Wait for 10 seconds before opening SMS
                                 } else {
                                     console.error('No contact number found');
                                 }
                             });
+
                         })
                         .catch(error => console.error('Geocoding Error:', error));
                 });
             }
         }
+
 
     </script>
 </body>
