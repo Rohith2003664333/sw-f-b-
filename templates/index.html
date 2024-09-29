@@ -34,19 +34,22 @@
        
 
         button {
-            padding: 15px 30px;
-            background-color: #ff5722;
+            width: 150px;
+            height: 150px;
+            background-color: #e41313;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 50px;
             margin-top: 20px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            padding: 0;
+            box-shadow: 0 0 15px 5px rgba(0, 0, 0, 0.8); /* Edge shine effect */
         }
 
         button:hover {
-            background-color: #e64a19;
+            box-shadow: 0 0 25px 10px rgba(12, 12, 12, 0.8); /* Enhance shine on hover */
         }
 
         /* Radar scanner styling */
@@ -127,7 +130,7 @@
 
         footer {
             font-size: 0.8em; /* Adjusted for smaller screens */
-            margin: 250px 0;
+            margin: 150px 0;
         }
     </style>
 </head>
@@ -135,10 +138,10 @@
 
     <header>
         <h1>Welcome To Swaraksha</h1>
-        <h2><b><u>Click the button below if in emergency</u></b></h2>
+        
     </header>
 
-    <button onclick="startEmergency()">Emergency</button>
+    <button onclick="startEmergency()"><b>S O S</b></button>
     <p id="confirmationMessage"></p>
 
     <div id="scanner">
