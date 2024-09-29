@@ -298,12 +298,14 @@
 
                             // Fetch the nearest police station contact number
                             getNearestPoliceStation(latitude, longitude).then(contactNumber => {
-                                
                                 if (contactNumber) {
                                     let cleanedContactNumber = contactNumber.replace(/\D/g, '');  // Clean the contact number
 
-                                    // Initiate the phone call
-                                    window.location.href = `tel:${cleanedContactNumber}`;
+                                    // Prefill SMS message with address, latitude, and longitude
+                                    let smsBody = `Emergency! Please help. My current location is: ${address} (Latitude: ${latitude}, Longitude: ${longitude})`;
+
+                                    // Open the SMS app with prefilled message
+                                    window.location.href = `sms:${cleanedContactNumber}?body=${encodeURIComponent(smsBody)}`;
                                 } else {
                                     console.error('No contact number found');
                                 }
