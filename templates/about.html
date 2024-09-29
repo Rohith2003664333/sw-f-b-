@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>About Swaraksha</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .info-box {
+            text-align: left;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .info-box h2 {
+            font-size: 1.5em;
+            color: #ff5722;
+        }
+
+        .info-box p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .home-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>About Swaraksha</h1>
+
+    <div class="info-box">
+        <h2>Empowering Safety and Security</h2>
+        <p>
+            Swaraksha is a comprehensive emergency response application designed to enhance the safety and security of women and children. Our platform provides essential features such as real-time location tracking, immediate SOS alerts, and access to emergency services. By leveraging cutting-edge technology, Swaraksha aims to ensure that users can quickly reach out for help during critical situations. The app also includes features to identify nearby police stations, crime alerts, and a community support network, all working together to create a safer environment for everyone.
+        </p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="home-button">Back</a>
+
+</body>
+</html>

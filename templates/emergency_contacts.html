@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <title>Emergency Contacts</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .contact-list {
+            text-align: left;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .contact-list h2 {
+            font-size: 1.2em;
+            color: #ff5722;
+        }
+
+        .contact-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .contact-list ul li {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .home-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Emergency Contact Numbers</h1>
+
+    <div class="contact-list">
+        <h2>Important Contacts:</h2>
+        <ul>
+            <li><strong>Women Helpline:</strong> 1091</li>
+            <li><strong>National Commission for Women:</strong> 011-26942369</li>
+            <li><strong>Police:</strong> 100</li>
+            <li><strong>Emergency Response Support System (ERSS):</strong> 112</li>
+            <li><strong>Child Helpline:</strong> 1098</li>
+            <li><strong>Women Welfare Department:</strong> 1234-567890</li>
+        </ul>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="home-button">Back</a>
+
+</body>
+</html>
