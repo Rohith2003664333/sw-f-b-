@@ -47,6 +47,7 @@
             text-decoration: none;
             border-radius: 5px;
             font-size: 1.1em;
+            border: none; /* Remove border for button */
         }
 
         .home-button:hover {
@@ -65,7 +66,13 @@
         </p>
     </div>
 
-    <a href="{{ url_for('index') }}" class="home-button">Back</a>
+    <button class="home-button" onclick="goBack()">Back</button>
+
+    <script>
+        function goBack() {
+            window.history.back(); // Go back to the previous page in history
+        }
+    </script>
 
 </body>
 </html>
