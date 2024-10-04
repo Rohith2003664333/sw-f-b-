@@ -10,5 +10,4 @@ soundfile
 pandas
 gunicorn
 pymongo
-MongoClient
 logging
