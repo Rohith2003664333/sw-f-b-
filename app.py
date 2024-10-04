@@ -1,26 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from flask import Flask, render_template, session
-
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify,session
 from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
-import bcrypt
 import math
 from pymongo import MongoClient
 import logging
-
 import numpy as np
 import librosa
 import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
 import sounddevice as sd
 import soundfile as sf
-import pandas as pd
 from werkzeug.utils import secure_filename
-import os
-import logging
-import math
 
 cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
