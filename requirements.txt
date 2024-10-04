@@ -1,3 +1,4 @@
+pymongo
 Flask
 Flask-Cors
 joblib
@@ -9,5 +10,5 @@ sounddevice
 soundfile
 pandas
 gunicorn
-pymongo
+
 
