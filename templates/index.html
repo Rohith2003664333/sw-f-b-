@@ -45,7 +45,7 @@
         }
 
         h1 {
-            color: #ffcc00;
+            color: #070600;
             margin: 0;
             font-size: 2em;
         }
@@ -184,9 +184,40 @@
             margin: 10px;
             width: 50%; /* Responsive width */
         }
+
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1; /* Ensure it stays above other content */
+            width: auto; /* Set width automatically based on padding */
+            height: auto; /* Allow height to adjust automatically */
+            border-radius: 5px; /* Optional: slight rounding to corners */
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+
+        #userGreeting {
+            position: absolute;
+            top: 20px; /* Align with the logout button */
+            right: 180px; /* Adjust position so it's next to the logout button */
+            font-size: 18px;
+            color: rgb(15, 1, 1);
+            z-index: 1; /* Ensure it stays above other content */
+        }
+
     </style>
 </head>
 <body>
+
+    
 
     <div id="menuButton" onclick="toggleMenu()">☰</div> <!-- Menu Button -->
     
@@ -198,8 +229,16 @@
     </div>
 
     <header>
-        <h1>Welcome To Swaraksha</h1>
+        <h1>Welcome {{ username }}!</h1>
     </header>
+    <form action="/logout" method="POST">
+        <div>
+            <button type="submit" class="logout-button">Logout</button>
+            <!-- </div><div id="userGreeting">Welcome, {{ username }}!</div>-->
+            
+        </div>
+    </form>
+    
 
     <button onclick="startEmergency()"><b>S O S</b></button>
     <p id="confirmationMessage"></p>
