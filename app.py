@@ -12,7 +12,7 @@ import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
 import sounddevice as sd
 import soundfile as sf
-from werkzeug.utils import secure_filename
+
 
 cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
