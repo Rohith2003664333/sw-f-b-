@@ -1,18 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify,session
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import joblib
-import pandas as pd
-import os
-import math
-from pymongo import MongoClient
-import logging
 import numpy as np
 import librosa
 import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
 import sounddevice as sd
 import soundfile as sf
-
+import pandas as pd
+from werkzeug.utils import secure_filename
+import os
+import logging
+import math
 
 cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
@@ -43,88 +42,11 @@ def crime_indicator(crime_count):
 # Apply classification to crime data
 df2['indicator'] = df2['total_crime_against_women'].apply(crime_indicator)
 
-
 app = Flask(__name__)
 CORS(app)
-app.secret_key = os.urandom(24)  # Ensure this is set for session handling
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-
-# MongoDB connection
-client = MongoClient("mongodb+srv://rh0665971:q7DFaWad4RKQRiWg@cluster0.gusg4.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
-db = client['swaraksha']
-users_collection = db['users']
-
-# Home page route
-@app.route('/index')
-def home():
-    
-    username = session.get('username', 'Guest')
-    return render_template('index.html',username=username)
-
-
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        # Log request.form to see what data is being sent
-        username = request.form.get('username')  # Use .get() to avoid KeyError
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        if not username or not email or not password:
-            flash('All fields are required!')
-            return redirect('register')
-
-        # Check if email already exists
-        if users_collection.find_one({'email': email}):
-            flash('Email already exists! Please log in.')
-            return redirect('/')
-
-        # Insert new user into MongoDB
-        users_collection.insert_one({
-            'username': username,
-            'email': email,
-
-            'password': password  # Plain text for now as requested
-        })
-
-        flash('Registration successful! Please log in.')
-        return redirect('/')
-
-    return render_template('registration.html')
-
-
-
-# Login route
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        # Check if user exists
-        user = users_collection.find_one({'email': email})
-
-        if user and password == user['password']:
-            session['username'] = user['username']
-            flash('Login successful!')
-            return redirect('index')  # Redirect to home after login
-        else:
-            flash('Invalid credentials! Please try again.')
-            return redirect('/')
-    
-    return render_template('login.html')
-
-# Logout route to clear the session
-@app.route('/logout', methods=['POST', 'GET'])  # Specify allowed methods
-def logout():
-    session.clear()  # Clear the session
-    flash('You have been logged out.')
-    return redirect(url_for('index')) 
 
 @app.route('/')
 def index():
@@ -193,7 +115,9 @@ def distance_p():
     
 
               
-
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 @app.route('/emergency', methods=['POST'])
 def emergency():
@@ -218,4 +142,5 @@ def get_crime_alert():
     return jsonify({'alert': crime_alert})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
