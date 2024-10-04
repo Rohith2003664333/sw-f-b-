@@ -9,3 +9,6 @@ sounddevice
 soundfile
 pandas
 gunicorn
+pymongo
+MongoClient
+logging
