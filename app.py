@@ -59,6 +59,44 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 client = MongoClient("mongodb+srv://rh0665971:q7DFaWad4RKQRiWg@cluster0.gusg4.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
 db = client['swaraksha']
 users_collection = db['users']
+messages_collection = db.messages
+
+# Route to render the community page
+@app.route('/community')
+def community():
+    username = session.get('username', 'Guest')
+    return render_template('community.html', username=username)
+
+# Route to get all messages
+@app.route('/getMessages', methods=['GET'])
+def get_messages():
+    messages = list(messages_collection.find({}, {'_id': 0, 'message': 1, 'username': 1}))
+    messages_list = [{"message": msg.get('message', ''), "username": msg.get('username', 'Anonymous')} for msg in messages]
+    return jsonify({"messages": messages_list})
+
+
+# Route to send a message
+@app.route('/sendMessage', methods=['POST'])
+def send_message():
+    data = request.json
+    username = session.get('username', 'Guest')
+    new_message = {"message": data['message'], "username": username}
+    messages_collection.insert_one(new_message)
+    return jsonify({"status": "Message sent!"})
+
+# Route to handle SOS messages (triggered when SOS button is pressed)
+@app.route('/sendSOS', methods=['POST'])
+def send_sos():
+    data = request.json
+    latitude = data['latitude']
+    longitude = data['longitude']
+    address=data['address']
+    username = session.get('username', 'Guest')
+    mobile = session.get('mobile','Guest')
+    sos_message = f"Emergency! Please help me at (address:{address},Latitude: {latitude}, Longitude: {longitude},mobile:{mobile})"
+    new_message = {"message":sos_message, "username": username}
+    messages_collection.insert_one(new_message)
+    return jsonify({"status": "SOS sent!"})
 
 # Home page route
 @app.route('/index')
@@ -75,6 +113,7 @@ def register():
     if request.method == 'POST':
         # Log request.form to see what data is being sent
         username = request.form.get('username')  # Use .get() to avoid KeyError
+        mobile=request.form.get('mobile')
         email = request.form.get('email')
         password = request.form.get('password')
 
@@ -90,6 +129,7 @@ def register():
         # Insert new user into MongoDB
         users_collection.insert_one({
             'username': username,
+            'mobile':mobile,
             'email': email,
 
             'password': password  # Plain text for now as requested
@@ -114,6 +154,7 @@ def login():
 
         if user and password == user['password']:
             session['username'] = user['username']
+            session['mobile']=user['mobile']
             flash('Login successful!')
             return redirect('index')  # Redirect to home after login
         else:
