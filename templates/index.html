@@ -75,54 +75,6 @@
             box-shadow: 0 0 25px 10px rgba(12, 12, 12, 0.8); /* Enhance shine on hover */
         }
 
-        /* Radar scanner styling */
-        #scanner {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 0, 0.4);
-            position: relative;
-            background: rgba(255, 255, 0, 0.1);
-            box-shadow: 0 0 20px 5px rgba(255, 255, 0, 0.3);
-            margin: 20px auto;
-            display: none;
-        }
-
-        #scanner::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 80%;
-            height: 2px;
-            background: rgba(255, 255, 0, 0.8);
-            transform-origin: 0% 0%;
-            animation: rotate-scan 2s linear infinite;
-        }
-
-        @keyframes rotate-scan {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .dot {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: rgba(255, 0, 0, 0.8);
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-            animation: blip 1s infinite;
-        }
-
-        .dot1 { bottom: 20px; right: 100px; animation-delay: 0.2s; }
-        .dot2 { bottom: 20px; left: 120px; animation-delay: 0.5s; }
-        .dot3 { top: 50px; left: 100px; animation-delay: 1s; }
-
-        #numPeople {
-            font-size: 20px;
-            margin-top: 20px;
-        }
 
         .info-box {
             background-color: rgba(255, 255, 255, 0.8);
@@ -189,7 +141,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background-color: #dc3545;
+            background-color: #0735b1;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -231,18 +183,14 @@
 
     <header>
         <h1>Welcome {{ username }}!</h1>
+        <button class="logout-button" onclick="location.href='/community'">Help Network</button>
     </header>
+    
     
 
     <button onclick="startEmergency()"><b>S O S</b></button>
     <p id="confirmationMessage"></p>
 
-    <div id="scanner">
-        <div class="dot dot1"></div>
-        <div class="dot dot2"></div>
-        <div class="dot dot3"></div>
-        <p><b>Scanning...</b></p>
-    </div>
 
     <p id="numPeople"></p>
     <div id="locationCity" class="info-box"><span class="status green">Location</span>: Unknown</div>
@@ -405,6 +353,21 @@
                                     longitude: longitude,
                                     address: address
                                 })
+                            });
+
+                            fetch('/sendSOS', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    latitude: latitude,
+                                    longitude: longitude,
+                                    address:address
+
+                                })
+                            }).then(response => {
+                                document.getElementById('confirmationMessage').textContent = 'Emergency sent to community and authorities!';
                             });
 
                             // Fetch the nearest police station contact number
