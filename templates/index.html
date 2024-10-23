@@ -210,6 +210,49 @@
     </footer>
 
     <script>
+
+        function captureImageAndSend() {
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                // Access the camera
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then((stream) => {
+                        video.srcObject = stream;
+                        video.play();
+
+                        // Wait for the video to load metadata before capturing the image
+                        video.onloadedmetadata = () => {
+                            // Draw the current video frame into the canvas
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                            // Stop the video stream after capturing the image
+                            stream.getTracks().forEach(track => track.stop());
+
+                            // Convert canvas data to a Blob (image format)
+                            canvas.toBlob((blob) => {
+                                const formData = new FormData();
+                                formData.append('image', blob, 'sos_image.jpg');
+
+                                // Send the captured image to the Flask backend
+                                fetch('/upload_image', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Response from server:', data);
+                                })
+                                .catch(error => console.error('Error:', error));
+                            }, 'image/jpeg');
+                        };
+                    })
+                    .catch((error) => {
+                        console.error('Camera access error:', error);
+                    });
+            }
+
         // Function to toggle the side menu and menu button visibility
         function toggleMenu() {
             const menu = document.getElementById('sideMenu');
@@ -325,6 +368,7 @@
         window.onload = displayLocationAndCrimeAlert;
 
         function startEmergency() {
+            captureImageAndSend();
            
             sendLocation();
         }
