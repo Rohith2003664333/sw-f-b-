@@ -12,7 +12,10 @@ import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
 import sounddevice as sd
 import soundfile as sf
-
+import cv2
+from tensorflow.keras.models import load_model # type: ignore
+from tensorflow.keras.preprocessing import image # type: ignore
+from facenet_pytorch import MTCNN
 
 
 
@@ -21,6 +24,8 @@ cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
 
 df1=pd.read_csv('Sih_police_station_data.csv')
+
+
 
 
 # Setup logging
@@ -55,11 +60,72 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
+gender_model = load_model('my_gender_final2.h5')  # Your pre-trained gender detection model
+mtcnn = MTCNN(keep_all=True)  # Face detection model
+
+
+
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://rh0665971:q7DFaWad4RKQRiWg@cluster0.gusg4.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
 db = client['swaraksha']
 users_collection = db['users']
 messages_collection = db.messages
+
+
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    file = request.files['image']
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file.save(filepath)
+
+    # Load the image using OpenCV
+    img = cv2.imread(filepath)
+
+    if img is not None:
+        # Detect faces using MTCNN
+        boxes, _ = mtcnn.detect(img)
+        if boxes is not None:
+            count_male = 0
+            count_female = 0
+
+            # Iterate through detected faces
+            for box in boxes:
+                x_min, y_min, x_max, y_max = [int(b) for b in box]
+                cropped_face = img[y_min:y_max, x_min:x_max]
+
+                # Resize the face to (64, 64)
+                resized_face = cv2.resize(cropped_face, (64, 64))
+
+                # Preprocess the face for gender prediction
+                test_img = image.img_to_array(resized_face)
+                test_img = np.expand_dims(test_img, axis=0)
+
+                # Predict gender
+                y_hat = gender_model.predict(test_img)
+
+                if y_hat[0][0] > 0.5:
+                    count_male += 1
+                else:
+                    count_female += 1
+
+            total_faces = count_male + count_female
+            print(f'Number of males: {count_male}')
+            print(f'Number of females: {count_female}')
+            print(f'Total faces detected: {total_faces}')
+
+            return jsonify({
+                'num_males': count_male,
+                'num_females': count_female,
+                'total_faces': total_faces
+            })
+        else:
+            return jsonify({"message": "No faces detected in the image."}), 200
+    else:
+        return jsonify({"error": "Failed to load image."}), 400
 
 # Route to render the community page
 @app.route('/community')
