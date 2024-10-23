@@ -10,4 +10,7 @@ soundfile
 pandas
 gunicorn
 pymongo
+cv2
+tensorflow
+facenet_pytorch
 
