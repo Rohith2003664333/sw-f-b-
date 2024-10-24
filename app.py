@@ -113,6 +113,7 @@ def upload_image():
             print(f'Number of males: {count_male}')
             print(f'Number of females: {count_female}')
             print(f'Total faces detected: {total_faces}')
+            logger.info(f'Number of males {count_male}\nNumber of females: {count_female}\nTotal faces detected: {total_faces}')
 
             return jsonify({
                 'num_males': count_male,
