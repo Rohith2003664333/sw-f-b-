@@ -7,7 +7,7 @@ scikit-learn
 pandas
 gunicorn
 pymongo
-tensorflow-lite
+tensorflow
 facenet_pytorch
 torch
 torchvision
