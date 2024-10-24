@@ -123,6 +123,8 @@ def upload_image():
 
             total_faces = count_male + count_female
             print(f'number of male:{count_male}\nnumber of female {count_female}\ntotal:{total_faces}')
+            logger.info(f'number of male:{count_male}\nnumber of female {count_female}\ntotal:{total_faces}')
+    
 
             # Clean up interpreter and memory after each request
             interpreter = None
