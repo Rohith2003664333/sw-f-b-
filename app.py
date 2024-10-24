@@ -14,7 +14,9 @@ from tensorflow.keras.models import load_model # type: ignore
 from tensorflow.keras.preprocessing import image # type: ignore
 from facenet_pytorch import MTCNN
 
-
+import torch
+import gc
+import tensorflow as tf
 
 
 cls = joblib.load('police_up.pkl')
@@ -58,8 +60,8 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
 gender_model = load_model('my_gender_final2.h5')  # Your pre-trained gender detection model
-mtcnn = MTCNN(keep_all=True)  # Face detection model
-
+device = torch.device('cpu')
+mtcnn = MTCNN(keep_all=True, device=device)
 
 
 
@@ -79,25 +81,27 @@ def upload_image():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
 
-    # Load the image using OpenCV
+    # Load the image using OpenCV and limit the size for efficiency
     img = cv2.imread(filepath)
-
+    
     if img is not None:
+        # Reduce the image size if too large (for faster processing)
+        if img.shape[0] > 1024 or img.shape[1] > 1024:
+            img = cv2.resize(img, (1024, 1024))
+
         # Detect faces using MTCNN
         boxes, _ = mtcnn.detect(img)
+        
         if boxes is not None:
             count_male = 0
             count_female = 0
 
-            # Iterate through detected faces
             for box in boxes:
                 x_min, y_min, x_max, y_max = [int(b) for b in box]
                 cropped_face = img[y_min:y_max, x_min:x_max]
 
-                # Resize the face to (64, 64)
+                # Resize the face for gender prediction
                 resized_face = cv2.resize(cropped_face, (64, 64))
-
-                # Preprocess the face for gender prediction
                 test_img = image.img_to_array(resized_face)
                 test_img = np.expand_dims(test_img, axis=0)
 
@@ -110,10 +114,11 @@ def upload_image():
                     count_female += 1
 
             total_faces = count_male + count_female
-            print(f'Number of males: {count_male}')
-            print(f'Number of females: {count_female}')
-            print(f'Total faces detected: {total_faces}')
-            logger.info(f'Number of males {count_male}\nNumber of females: {count_female}\nTotal faces detected: {total_faces}')
+            logger.info(f'Number of males: {count_male}, Number of females: {count_female}, Total faces: {total_faces}')
+
+            # Trigger garbage collection
+            del img, test_img, resized_face
+            gc.collect()
 
             return jsonify({
                 'num_males': count_male,
