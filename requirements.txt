@@ -11,4 +11,4 @@ tensorflow
 facenet_pytorch
 torch
 torchvision
-opencv-python
+opencv-python-headless
