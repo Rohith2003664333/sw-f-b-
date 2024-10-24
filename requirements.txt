@@ -7,7 +7,7 @@ scikit-learn
 pandas
 gunicorn
 pymongo
-tensorflow-cpu==2.17.0
+tensorflow-lite
 facenet_pytorch
 torch
 torchvision
