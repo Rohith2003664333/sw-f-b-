@@ -2,8 +2,11 @@ Flask
 Flask-Cors
 joblib
 numpy
+librosa
 scipy
 scikit-learn
+sounddevice
+soundfile
 pandas
 gunicorn
 pymongo
@@ -12,4 +15,3 @@ facenet_pytorch
 torch
 torchvision
 opencv-python
-
