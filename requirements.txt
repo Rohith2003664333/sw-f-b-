@@ -2,11 +2,8 @@ Flask
 Flask-Cors
 joblib
 numpy
-librosa
 scipy
 scikit-learn
-sounddevice
-soundfile
 pandas
 gunicorn
 pymongo
