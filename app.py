@@ -7,7 +7,6 @@ import math
 from pymongo import MongoClient
 import logging
 import numpy as np
-import librosa
 import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
 import sounddevice as sd
