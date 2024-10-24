@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify,session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_cors import CORS
 import joblib
 import pandas as pd
@@ -10,22 +10,17 @@ import numpy as np
 import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
 import cv2
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import load_model  # type: ignore
+from tensorflow.keras.preprocessing import image  # type: ignore
 from facenet_pytorch import MTCNN
-
 import torch
 import gc
 import tensorflow as tf
 
-
 cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
 
-df1=pd.read_csv('Sih_police_station_data.csv')
-
-
-
+df1 = pd.read_csv('Sih_police_station_data.csv')
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +45,6 @@ def crime_indicator(crime_count):
 # Apply classification to crime data
 df2['indicator'] = df2['total_crime_against_women'].apply(crime_indicator)
 
-
 app = Flask(__name__)
 CORS(app)
 app.secret_key = os.urandom(24)  # Ensure this is set for session handling
@@ -58,13 +52,14 @@ app.secret_key = os.urandom(24)  # Ensure this is set for session handling
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+# TensorFlow Lite model initialization (moved inside the route for thread-safety)
+def initialize_interpreter():
+    interpreter = tf.lite.Interpreter(model_path="my_gender_final2.tflite")
+    interpreter.allocate_tensors()
+    return interpreter
 
-gender_model = load_model('my_gender_final2.h5')  # Your pre-trained gender detection model
-device = torch.device('cpu')
-mtcnn = MTCNN(keep_all=True, device=device)
-
-
+# MTCNN for face detection
+mtcnn = MTCNN(keep_all=True)
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://rh0665971:q7DFaWad4RKQRiWg@cluster0.gusg4.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
@@ -72,6 +67,23 @@ db = client['swaraksha']
 users_collection = db['users']
 messages_collection = db.messages
 
+# Modify the gender prediction code using TensorFlow Lite
+def predict_gender(interpreter, resized_face):
+    # Preprocess the face image
+    test_img = cv2.resize(resized_face, (64, 64))
+    test_img = np.expand_dims(test_img, axis=0).astype(np.float32)
+
+    # Set the input tensor
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    interpreter.set_tensor(input_details[0]['index'], test_img)
+
+    # Run the inference
+    interpreter.invoke()
+
+    # Get the prediction
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    return output_data
 
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
@@ -82,32 +94,27 @@ def upload_image():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
 
-    # Load the image using OpenCV and limit the size for efficiency
     img = cv2.imread(filepath)
-    
     if img is not None:
-        # Reduce the image size if too large (for faster processing)
         if img.shape[0] > 1024 or img.shape[1] > 1024:
             img = cv2.resize(img, (1024, 1024))
 
         # Detect faces using MTCNN
         boxes, _ = mtcnn.detect(img)
-        
+
         if boxes is not None:
             count_male = 0
             count_female = 0
+
+            # Initialize the TensorFlow Lite interpreter per request (thread-safe)
+            interpreter = initialize_interpreter()
 
             for box in boxes:
                 x_min, y_min, x_max, y_max = [int(b) for b in box]
                 cropped_face = img[y_min:y_max, x_min:x_max]
 
-                # Resize the face for gender prediction
-                resized_face = cv2.resize(cropped_face, (64, 64))
-                test_img = image.img_to_array(resized_face)
-                test_img = np.expand_dims(test_img, axis=0)
-
-                # Predict gender
-                y_hat = gender_model.predict(test_img)
+                # Predict gender using TensorFlow Lite
+                y_hat = predict_gender(interpreter, cropped_face)
 
                 if y_hat[0][0] > 0.5:
                     count_male += 1
@@ -115,10 +122,10 @@ def upload_image():
                     count_female += 1
 
             total_faces = count_male + count_female
-            logger.info(f'Number of males: {count_male}, Number of females: {count_female}, Total faces: {total_faces}')
+            print(f'number of male:{count_male}\nnumber of female {count_female}\ntotal:{total_faces}')
 
-            # Trigger garbage collection
-            del img, test_img, resized_face
+            # Clean up interpreter and memory after each request
+            interpreter = None
             gc.collect()
 
             return jsonify({
@@ -126,10 +133,14 @@ def upload_image():
                 'num_females': count_female,
                 'total_faces': total_faces
             })
+
         else:
             return jsonify({"message": "No faces detected in the image."}), 200
+
     else:
         return jsonify({"error": "Failed to load image."}), 400
+    
+
 
 # Route to render the community page
 @app.route('/community')
