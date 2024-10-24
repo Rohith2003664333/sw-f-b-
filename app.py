@@ -58,6 +58,7 @@ app.secret_key = os.urandom(24)  # Ensure this is set for session handling
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 gender_model = load_model('my_gender_final2.h5')  # Your pre-trained gender detection model
 device = torch.device('cpu')
