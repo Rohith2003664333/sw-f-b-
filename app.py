@@ -9,8 +9,6 @@ import logging
 import numpy as np
 import scipy.cluster.hierarchy as sch
 from sklearn.preprocessing import StandardScaler
-import sounddevice as sd
-import soundfile as sf
 import cv2
 from tensorflow.keras.models import load_model # type: ignore
 from tensorflow.keras.preprocessing import image # type: ignore
