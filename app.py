@@ -12,14 +12,12 @@ from sklearn.preprocessing import StandardScaler
 import cv2
 from tensorflow.keras.models import load_model  # type: ignore
 from tensorflow.keras.preprocessing import image  # type: ignore
-from facenet_pytorch import MTCNN
-import torch
 import gc
 import tensorflow as tf
 
+# Load pre-trained models and data
 cls = joblib.load('police_up.pkl')
 en = joblib.load('label_encoder_up.pkl')  
-
 df1 = pd.read_csv('Sih_police_station_data.csv')
 
 # Setup logging
@@ -58,8 +56,8 @@ def initialize_interpreter():
     interpreter.allocate_tensors()
     return interpreter
 
-# MTCNN for face detection
-mtcnn = MTCNN(keep_all=True)
+# Load Haar Cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://rh0665971:q7DFaWad4RKQRiWg@cluster0.gusg4.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
@@ -99,19 +97,19 @@ def upload_image():
         if img.shape[0] > 1024 or img.shape[1] > 1024:
             img = cv2.resize(img, (1024, 1024))
 
-        # Detect faces using MTCNN
-        boxes, _ = mtcnn.detect(img)
+        # Detect faces using Haar Cascade
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-        if boxes is not None:
+        if len(faces) > 0:
             count_male = 0
             count_female = 0
 
             # Initialize the TensorFlow Lite interpreter per request (thread-safe)
             interpreter = initialize_interpreter()
 
-            for box in boxes:
-                x_min, y_min, x_max, y_max = [int(b) for b in box]
-                cropped_face = img[y_min:y_max, x_min:x_max]
+            for (x, y, w, h) in faces:
+                cropped_face = img[y:y+h, x:x+w]
 
                 # Predict gender using TensorFlow Lite
                 y_hat = predict_gender(interpreter, cropped_face)
@@ -122,9 +120,8 @@ def upload_image():
                     count_female += 1
 
             total_faces = count_male + count_female
-            print(f'number of male:{count_male}\nnumber of female {count_female}\ntotal:{total_faces}')
-            logger.info(f'number of male:{count_male}\nnumber of female {count_female}\ntotal:{total_faces}')
-    
+            print(f'number of male: {count_male}\nnumber of female: {count_female}\ntotal: {total_faces}')
+            logger.info(f'number of male: {count_male}\nnumber of female: {count_female}\ntotal: {total_faces}')
 
             # Clean up interpreter and memory after each request
             interpreter = None
@@ -142,8 +139,6 @@ def upload_image():
     else:
         return jsonify({"error": "Failed to load image."}), 400
     
-
-
 # Route to render the community page
 @app.route('/community')
 def community():
